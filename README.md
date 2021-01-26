@@ -34,6 +34,18 @@ e.g. `climate.chatterbox_bedroom1`. Internal state (coil
 temperatures, compressor loading) are exported as device attributes.
 
 
+## Limitations
+
+Manipulation of the EEPROM data (zones, schedules, zone baffle settings) are
+intentionally left out. I didn't want to risk EEPROM wearout.
+
+I also don't bother with the RTC as it doesn't track date and is of little use
+with this integration.
+
+The data exported by this version is focused on Digital Scroll Compressor
+systems. It seems there are other systems that can use the same interface but I
+don't have one handy so I can't easily guess the ranges of values for those.
+
 ## Reverse Engineering
 
 The following is roughly the memory layout for volatile RAM.
