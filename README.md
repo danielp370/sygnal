@@ -23,8 +23,8 @@ to RAM (settings), RTC (clock) and EEPROM (name of zones, schedules).
    ```
 
 You should see entities for `climate.chatterbox` and a switch for each zone.
-e.g. `climate.chatterbox_bedroom1`. Support for internal state (coil
-temperatures, etc) is supported in chatterbox.py but not exposed yet to hass.
+e.g. `climate.chatterbox_bedroom1`. Internal state (coil
+temperatures, compressor loading) are exported as device attributes.
 
 
 ## Reverse Engineering
