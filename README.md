@@ -1,11 +1,18 @@
 # Livezi/Sygnal Chatterbox Support
 
-This is for personal use, shared in case others find it of use. 
-It seems that the Livezi brand was acquired by Sygnal some time around 2015 
-and I imagine the firmware on modern chatterbox units may be significantly different to mine.
+This is a [home assistant](https://homeassistant.io) module for Sygnal/Livezi
+branded chatterbox devices, allowing full local integration of these devices with
+homeassistant.
+
+This is for personal use, shared in case other people find it of use. 
+
+Note that I have a Livezi device. It seems that the Livezi brand was acquired by 
+Sygnal some time around 2015 and I imagine the firmware on modern chatterbox units 
+may be significantly different to mine.
 
 This code works for me. It might work for you. I'm not too keen on updating my
-firmware to support newer versions but will happily accept patches.
+firmware to support newer versions while it's working so well but will happily
+accept patches.
 
 Default "use at your own risk" and "I make no guarantees" apply.
 From what I can tell, the API I am using gives direct read/write access 
