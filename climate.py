@@ -90,11 +90,6 @@ class SygnalZone(SwitchEntity):
       return self._api.zone_is_enabled(self._zone)
 
     @property
-    def should_poll(self) -> bool:
-        """No polling needed."""
-        return False
-
-    @property
     def unique_id(self):
       return '%s_%s' % (self._api.unique_id, self._zone)
 
@@ -128,6 +123,14 @@ class SygnalClimate(ClimateEntity):
     @property
     def unique_id(self):
         return self._api.unique_id
+
+    @property
+    def device_state_attributes(self):
+        return {
+          'outside_coil_temperature': self._api.outside_coil_temperature,
+          'inside_coil_temperature': self._api.inside_coil_temperature,
+          'compressor_loading': self._api.compressor_loading,
+        }
 
     @property
     def temperature_unit(self):
@@ -191,7 +194,6 @@ class SygnalClimate(ClimateEntity):
         return self._api.device_info
 
     async def async_set_temperature(self, **kwargs):
-        _LOGGER.error("kwargs are %s" % kwargs)
         await self._api.async_set_temperature(kwargs['temperature'])
 
     async def async_set_hvac_mode(self, hvac_mode):

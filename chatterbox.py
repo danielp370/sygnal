@@ -134,7 +134,7 @@ class SygnalApi(object):
             name = ''.join([chr(c) for c in self._ee[i*8:(i+1)*8]]).rstrip()
             self._zones[name] = i
 
-    async def async_write_vram(self, offset, mask, value)
+    async def async_write_vram(self, offset, mask, value):
         await self._client.async_write_vram(offset, mask, value)
         self._vram[offset] = self._vram[offset] & (0xff ^ mask)
         self._vram[offset] = self._vram[offset] | (mask & value)
