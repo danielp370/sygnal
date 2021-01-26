@@ -1,6 +1,6 @@
 # Livezi/Sygnal Chatterbox Support
 
-This is a [home assistant](https://homeassistant.io) module for Sygnal/Livezi
+This is a [home assistant](https://home-assistant.io) module for Sygnal/Livezi
 branded chatterbox devices, allowing full local integration of these devices with
 homeassistant.
 
