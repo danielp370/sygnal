@@ -160,7 +160,7 @@ class SygnalApi(object):
           0x08: 'TC Running',
           0x10: 'Compressor Running',
           0x20: 'Compressor Fan Running',
-          0x40: 'RV Running',
+          0x40: 'RV Running',              # RV = Relief Valve? Surely not...
           0x80: 'Crank Heater',
         }
         status = [STATES[1 << i] for i in range(8) if self._vram[60]&(1 << i)]

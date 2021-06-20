@@ -1,6 +1,7 @@
 {
   "domain": "sygnal",
   "name": "Sygnal ChatterBox",
+  "version": "1.0.0",
   "documentation": "https://github.com/aarond10/sygnal",
   "issue_tracker": "https://github.com/aarond10/sygnal/issues",
   "dependencies": [],
