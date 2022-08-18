@@ -123,9 +123,17 @@ class SygnalApi(object):
 
     async def async_update(self):
         self._vram = await self._client.async_read_vram(0, 69)
-        ee1 = await self._client.async_read_eeprom(0, 128)
-        ee2 = await self._client.async_read_eeprom(128, 150 - 128)
-        self._ee = ee1[0]['values'] + ee2[0]['values']
+        self._ee = []
+        ofs = 0
+        while ofs < 150:
+          end = min(150, ofs + 64)
+          try:
+            data = await self._client.async_read_eeprom(ofs, end - ofs)
+            self._ee += data[0]['values']
+            ofs = end
+          except Exception as e:
+            println("Exception reading EEPROM range [%d:%d): %s" % (
+              ofs, end, e))
         self._rtc = await self._client.async_read_rtc()
         self._device_info = await self._client.get_device_info()
         self._zones = dict()
