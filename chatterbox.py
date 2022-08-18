@@ -119,7 +119,7 @@ class SygnalApi(object):
         self._vram = [0]*69
         self._ee = [0]*150
         self._rtc = "Mon 00:00:00"
-        self._device_info = ""
+        self._device_info = {}
 
     async def async_update(self):
         self._vram = await self._client.async_read_vram(0, 69)
@@ -153,7 +153,11 @@ class SygnalApi(object):
 
     @property
     def unique_id(self):
-        return self._device_info['local']['mac'].replace(':','')
+        try:
+          return self._device_info['local']['mac'].replace(':','')
+        except:
+          println("unique_id() called before device info updated.")
+          return None
 
     @property 
     def device_info(self):
