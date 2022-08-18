@@ -106,9 +106,13 @@ class SygnalClient(object):
     async def async_read_rtc(self) -> datetime.datetime:
         data = json.dumps({'method': "fetch", 'params': [{'table': "rtc", 'start': 0, 'marker': "rot3", 'length': 4, 'datatype': "bytes"}]})
         ret = await self._post(data)
-        ret = ret[0]['values']
+        try: 
+          ret = ret[0]['values']
         # TODO: We should subtract 'age' from time to be more accurate.
-        return '%s %02d:%02d:%02d' % (_DAYS[ret[3]], ret[2], ret[1], ret[0])
+          return '%s %02d:%02d:%02d' % (_DAYS[ret[3]], ret[2], ret[1], ret[0])
+        except Exception as e:
+          print("Error reading RTC: %s" % e)
+          return None
 
     async def async_write_rtc(self, now : datetime.datetime) -> bool:
         raise NotImplemented()
@@ -118,7 +122,7 @@ class SygnalApi(object):
         self._client = client
         self._vram = [0]*69
         self._ee = [0]*150
-        self._rtc = "Mon 00:00:00"
+        #self._rtc = "Mon 00:00:00"
         self._device_info = {}
 
     async def async_update(self):
@@ -132,12 +136,12 @@ class SygnalApi(object):
             self._ee += data[0]['values']
             ofs = end
           except Exception as e:
-            println("Exception reading EEPROM range [%d:%d): %s" % (
+            print("Exception reading EEPROM range [%d:%d): %s" % (
               ofs, end, e))
-        try:
-          self._rtc = await self._client.async_read_rtc()
-        except Exception as e:
-          println("Exception reading RTC: %s" % e)
+        #try:
+          #self._rtc = await self._client.async_read_rtc()
+        #except Exception as e:
+          #print("Exception reading RTC: %s" % e)
         try:
           self._device_info = await self._client.get_device_info()
         except Exception as e:
