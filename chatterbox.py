@@ -134,8 +134,14 @@ class SygnalApi(object):
           except Exception as e:
             println("Exception reading EEPROM range [%d:%d): %s" % (
               ofs, end, e))
-        self._rtc = await self._client.async_read_rtc()
-        self._device_info = await self._client.get_device_info()
+        try:
+          self._rtc = await self._client.async_read_rtc()
+        except Exception as e:
+          println("Exception reading RTC: %s" % e)
+        try:
+          self._device_info = await self._client.get_device_info()
+        except Exception as e:
+          println("Exception reading device info: %s" % e)
         self._zones = dict()
         for i in range(8):
           if self._zone_mask & (1 << i):

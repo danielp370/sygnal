@@ -116,6 +116,10 @@ class SygnalClimate(ClimateEntity):
         return SUPPORT_TARGET_TEMPERATURE | SUPPORT_FAN_MODE
 
     @property
+    def icon(self):
+        return "mdi:air-conditioner";
+
+    @property
     def name(self):
         """Return the name of the thermostat, if any."""
         return self._name
