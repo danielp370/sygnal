@@ -7,6 +7,7 @@ import logging
 import time
 import sys
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.entity_platform import async_get_platforms
 
 from .chatterbox import SygnalClient, SygnalApi
 
@@ -27,7 +28,7 @@ from homeassistant.components.climate.const import (
     SUPPORT_FAN_MODE,
     SUPPORT_TARGET_TEMPERATURE,
 )
-from homeassistant.const import CONF_HOST, CONF_NAME, TEMP_CELSIUS
+from homeassistant.const import CONF_HOST, CONF_NAME, TEMP_CELSIUS, Platform
 import homeassistant.helpers.config_validation as cv
 
 _LOGGER = logging.getLogger(__name__)
@@ -57,6 +58,14 @@ FAN_MODE_TO_SYGNAL = {
 }
 FAN_MODE_FROM_SYGNAL = {v:k for k,v in FAN_MODE_TO_SYGNAL.items()}
 
+def get_platform(hass, name):
+    platform_list = async_get_platforms(hass, name)
+
+    for platform in platform_list:
+        if platform.domain == name:
+            return platform
+
+    return None
 
 async def async_setup_platform(hass, config, async_add_entities, discovery_info=None):
     host = config[CONF_HOST]
@@ -67,11 +76,14 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     # Poll at setup time to get unique id and zone info
     await api.async_update()
 
-    entities = []
+    async_add_entities([SygnalClimate(name, api)])
+
+    # TODO: possible race here if switch does not (yet) exist
+    switch_platform = get_platform(hass, Platform.SWITCH)
+    zones = []
     for zone in api.zones:
-      entities.append(SygnalZone(name, zone, api))
-    entities.append(SygnalClimate(name, api))
-    async_add_entities(entities)
+      zones.append(SygnalZone(name, zone, api))
+    await switch_platform.async_add_entities(zones)
 
 
 class SygnalZone(SwitchEntity):
