@@ -106,12 +106,19 @@ class SygnalZone(FanEntity):
       return '%s_%s' % (self._api.unique_id, self._zone)
 
     @property
-    def percentage(self):
+    def percentage(self) -> Optional[int]:
       return self._api.zone_fanspeed(self._zone)
 
     @property
-    def speed_count(self):
+    def speed_count(self) -> int:
       return self._api.zone_speed_count(self._zone)
+
+    async def async_set_percentage(self, percentage: int) -> None:
+      if percentage == 0:
+        await self._api.async_set_zone_enabled(self._zone, True)
+        return
+
+      await self._api.async_set_zone_fanspeed(self, self._zone, percentage)
 
     async def async_turn_on(self, **kwargs):
       await self._api.async_set_zone_enabled(self._zone, True)
