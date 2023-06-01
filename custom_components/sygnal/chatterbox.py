@@ -33,6 +33,8 @@ FAN_MEDIUM = 'medium'
 FAN_HIGH = 'high'
 FAN_AUTO = 'auto'
 
+# zone fan speeds seem to be from 10%, with increments of 5%
+ZONE_FANSPEED_RANGE = range(10,100+1,5)
 
 class SygnalClient(object):
     def __init__(self, hostname: Text, client_session):
@@ -292,15 +294,35 @@ class SygnalApi(object):
 
     def zone_is_enabled(self, name: Text):
       if name not in self._zones:
-        raise InvalidArgument('Bad zone IX')
+        raise InvalidArgument('Bad zone IX %s' % name)
       ix = self._zones[name]
       return True if self._vram[2+ix]&0x80 else False
-      
+
     async def async_set_zone_enabled(self, name: str, state: bool):
       if name not in self._zones:
         raise InvalidArgument('Bad zone IX')
       ix = self._zones[name]
       await self.async_write_vram(2 + ix, 0x80, 0x80 if state else 0x00)
+
+    def zone_fanspeed(self, name: Text):
+      if name not in self._zones:
+        raise InvalidArgument('Bad zone IX')
+      ix = self._zones[name]
+      return self._vram[2+ix]&0x7f
+
+    def zone_speed_count(self):
+      return len(ZONE_FANSPEED_RANGE)
+
+    async def async_set_zone_fanspeed(self, name: str, state: int):
+      if name not in self._zones:
+        raise InvalidArgument('Bad zone IX')
+      ix = self._zones[name]
+      if state < 0 or state > 100: return
+      # map state value to an allowed step
+      state = min(ZONE_FANSPEED_RANGE, key=lambda x:abs(x-state))
+      # dont write to eeprom if it is already set to this value
+      if self.zone_fanspeed(name) == state: return
+      await self.async_write_vram(2 + ix, 0x7f, state & 0x7f)
 
 if __name__ == "__main__":
     async def main():

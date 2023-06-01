@@ -13,7 +13,7 @@ from .chatterbox import SygnalClient, SygnalApi
 
 import voluptuous as vol
 
-from homeassistant.components.switch import SwitchEntity
+from homeassistant.components.fan import FanEntity
 from homeassistant.components.climate import PLATFORM_SCHEMA, ClimateEntity
 from homeassistant.components.climate.const import (
     HVAC_MODE_OFF,
@@ -79,15 +79,15 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities([SygnalClimate(name, api)])
 
     # TODO: possible race here if switch does not (yet) exist
-    switch_platform = get_platform(hass, Platform.SWITCH)
+    fan_platform = get_platform(hass, Platform.FAN)
     zones = []
     for zone in api.zones:
       zones.append(SygnalZone(name, zone, api))
-    await switch_platform.async_add_entities(zones)
+    await fan_platform.async_add_entities(zones)
 
 
-class SygnalZone(SwitchEntity):
-    """Represents a single zone switch on a Livezi/Sygnal HVAC."""
+class SygnalZone(FanEntity):
+    """Represents a single zone fan switch on a Livezi/Sygnal HVAC."""
     def __init__(self, name, zone, api):
       self._name = name
       self._zone = zone
@@ -104,6 +104,14 @@ class SygnalZone(SwitchEntity):
     @property
     def unique_id(self):
       return '%s_%s' % (self._api.unique_id, self._zone)
+
+    @property
+    def percentage(self):
+      return self._api.zone_fanspeed(self._zone)
+
+    @property
+    def speed_count(self):
+      return self._api.zone_speed_count(self._zone)
 
     async def async_turn_on(self, **kwargs):
       await self._api.async_set_zone_enabled(self._zone, True)
