@@ -36,6 +36,9 @@ FAN_AUTO = 'auto'
 # zone fan speeds seem to be from 10%, with increments of 5%
 ZONE_FANSPEED_RANGE = range(10,100+1,5)
 
+class InvalidArgument(ValueError):
+    pass
+
 class SygnalClient(object):
     def __init__(self, hostname: Text, client_session):
         self._hostname = hostname
@@ -294,7 +297,7 @@ class SygnalApi(object):
 
     def zone_is_enabled(self, name: Text):
       if name not in self._zones:
-        raise InvalidArgument('Bad zone IX %s' % name)
+        raise InvalidArgument('Bad zone IX %s - %s' % (name,str(self._zones)))
       ix = self._zones[name]
       return True if self._vram[2+ix]&0x80 else False
 
@@ -310,7 +313,7 @@ class SygnalApi(object):
       ix = self._zones[name]
       return self._vram[2+ix]&0x7f
 
-    def zone_speed_count(self):
+    def zone_speed_count(self, name: Text):
       return len(ZONE_FANSPEED_RANGE)
 
     async def async_set_zone_fanspeed(self, name: str, state: int):

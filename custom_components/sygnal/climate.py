@@ -6,6 +6,7 @@ import datetime
 import logging
 import time
 import sys
+from typing import Optional, Any
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.entity_platform import async_get_platforms
 
@@ -13,7 +14,7 @@ from .chatterbox import SygnalClient, SygnalApi
 
 import voluptuous as vol
 
-from homeassistant.components.fan import FanEntity
+from homeassistant.components.fan import FanEntity, SUPPORT_SET_SPEED
 from homeassistant.components.climate import PLATFORM_SCHEMA, ClimateEntity
 from homeassistant.components.climate.const import (
     HVAC_MODE_OFF,
@@ -106,14 +107,26 @@ class SygnalZone(FanEntity):
       return '%s_%s' % (self._api.unique_id, self._zone)
 
     @property
-    def percentage(self):
+    def percentage(self) -> Optional[int]:
       return self._api.zone_fanspeed(self._zone)
 
     @property
-    def speed_count(self):
+    def speed_count(self) -> int:
       return self._api.zone_speed_count(self._zone)
 
-    async def async_turn_on(self, **kwargs):
+    @property
+    def supported_features(self) -> int:
+        return SUPPORT_SET_SPEED
+
+    async def async_set_percentage(self, percentage: int) -> None:
+      if percentage == 0:
+        await self._api.async_set_zone_enabled(self._zone, True)
+        return
+
+      await self._api.async_set_zone_fanspeed(self._zone, percentage)
+
+    async def async_turn_on(self, speed: Optional[str] = None, percentage: Optional[int] = None, preset_mode: Optional[str] = None, **kwargs: Any) -> None:
+
       await self._api.async_set_zone_enabled(self._zone, True)
 
     async def async_turn_off(self, **kwargs):
