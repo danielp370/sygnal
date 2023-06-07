@@ -39,12 +39,27 @@ temperatures, compressor loading) are exported as device attributes.
 Manipulation of the EEPROM data (zones, schedules, zone baffle settings) are
 intentionally left out. I didn't want to risk EEPROM wearout.
 
+I only read the EEPROM at startup because it seems slightly flaky
+and potentially slow and wasteful to re-read it on every update when it almost
+never changes.
+
 I also don't bother with the RTC as it doesn't track date and is of little use
 with this integration.
 
 The data exported by this version is focused on Digital Scroll Compressor
 systems. It seems there are other systems that can use the same interface but I
 don't have one handy so I can't easily guess the ranges of values for those.
+
+## Entities
+
+The integration exports:
+  * one `climate` entity for the central AC unit itself.
+  * A `cover` entity for every zone, allowing control of the
+    damper settings as well as zone on/off.
+  * A `switch` entity for every zone. This provides the equivalent of cover
+    up/down but is potentially more ergonomic on dashboards if you don't want 
+    damper settings to be changed.
+  * A set of `sensor` entities for the temperature and internal system states.
 
 ## Reverse Engineering
 

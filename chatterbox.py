@@ -34,6 +34,10 @@ FAN_HIGH = 'high'
 FAN_AUTO = 'auto'
 
 
+class InvalidArgument(Exception):
+  """Raised if invalid arguments are provided to SygnalClient."""
+  pass
+
 class SygnalClient(object):
     def __init__(self, hostname: Text, client_session):
         self._hostname = hostname
@@ -58,6 +62,7 @@ class SygnalClient(object):
             return data
         except (aiohttp.ClientError, IndexError) as error:
           _LOGGER.error("Failed to read chatterbox device info: %s", error)
+          raise error
 
     async def async_read_vram(self, offset : int, length : int) -> List[int]:
         # Only if the *entire* value being read is in valid cache will we use it.
@@ -125,19 +130,33 @@ class SygnalApi(object):
         #self._rtc = "Mon 00:00:00"
         self._device_info = {}
 
-    async def async_update(self):
-        self._vram = await self._client.async_read_vram(0, 69)
-        self._ee = []
-        ofs = 0
-        while ofs < 150:
-          end = min(150, ofs + 64)
+    async def _async_read_full_eeprom(self):
+        ee = []
+        while len(ee) < 150:
+          end = min(150, len(ee) + 128)
           try:
-            data = await self._client.async_read_eeprom(ofs, end - ofs)
-            self._ee += data[0]['values']
-            ofs = end
+            data = await self._client.async_read_eeprom(len(ee), end - len(ee))
+            # Nb: Occasionally eeprom reads seem to fail, resulting in zero data
+            # being returned. We need to take this into account or we can end up
+            # with data at the wrong offsets.
+            ee += data[0]['values']
           except Exception as e:
             print("Exception reading EEPROM range [%d:%d): %s" % (
-              ofs, end, e))
+              len(ee), end, e))
+        return ee
+
+    async def async_update(self):
+        self._vram = await self._client.async_read_vram(0, 69)
+
+        # The eeprom shouldn't change often so we don't bother refreshing it.
+        if self._ee[0] == 0:
+          self._ee = await self._async_read_full_eeprom()
+          self._zones = dict()
+          for i in range(8):
+            if self._zone_mask & (1 << i):
+              name = ''.join([chr(c) for c in self._ee[i*8:(i+1)*8]]).rstrip()
+              self._zones[name] = i
+
         #try:
           #self._rtc = await self._client.async_read_rtc()
         #except Exception as e:
@@ -145,12 +164,7 @@ class SygnalApi(object):
         try:
           self._device_info = await self._client.get_device_info()
         except Exception as e:
-          println("Exception reading device info: %s" % e)
-        self._zones = dict()
-        for i in range(8):
-          if self._zone_mask & (1 << i):
-            name = ''.join([chr(c) for c in self._ee[i*8:(i+1)*8]]).rstrip()
-            self._zones[name] = i
+          print("Exception reading device info: %s" % e)
 
     async def async_write_vram(self, offset, mask, value):
         await self._client.async_write_vram(offset, mask, value)
@@ -166,7 +180,7 @@ class SygnalApi(object):
         try:
           return self._device_info['local']['mac'].replace(':','')
         except:
-          println("unique_id() called before device info updated.")
+          print("unique_id() called before device info updated.")
           return None
 
     @property 
@@ -290,17 +304,35 @@ class SygnalApi(object):
     def zones(self):
       return self._zones.keys()
 
-    def zone_is_enabled(self, name: Text):
+    def zone_state(self, name: Text):
+      """Read the on/off state for a given zone."""
       if name not in self._zones:
-        raise InvalidArgument('Bad zone IX')
+        raise InvalidArgument('Bad zone (%s not in %s)' % (name, self._zones))
       ix = self._zones[name]
-      return True if self._vram[2+ix]&0x80 else False
+      return self._vram[2+ix] & 0x80 != 0
+
+    def zone_damper_position(self, name: Text):
+      """Read the last measured actual damper position for a given zone."""
+      if name not in self._zones:
+        raise InvalidArgument('Bad zone (%s not in %s)' % (name, self._zones))
+      ix = self._zones[name]
+      return self._vram[47+ix]
+
+    async def async_set_zone_damper_position(self, name: str, position: int):
+      """Set the zone damper position (0-100) for when zone is enabled."""
+      if name not in self._zones:
+        raise InvalidArgument('Bad zone (%s not in %s)' % (name, self._zones))
+      ix = self._zones[name]
+      position = min(100,max(0,position))
+      await self.async_write_vram(2 + ix, 0x7f, position)
       
-    async def async_set_zone_enabled(self, name: str, state: bool):
+    async def async_set_zone_state(self, name: str, enabled: bool):
+      """Enable/disable a given zone."""
       if name not in self._zones:
-        raise InvalidArgument('Bad zone IX')
+        raise InvalidArgument('Bad zone (%s not in %s)' % (name, self._zones))
       ix = self._zones[name]
-      await self.async_write_vram(2 + ix, 0x80, 0x80 if state else 0x00)
+      val = 0x80 if enabled else 0x00
+      await self.async_write_vram(2 + ix, 0x80, val)
 
 if __name__ == "__main__":
     async def main():
@@ -323,7 +355,7 @@ if __name__ == "__main__":
             print('fan_mode', api.fan_mode)
             print('zones', api.zones)
             for z in api.zones:
-              print('  %s: %s' % (z, api.zone_is_enabled(z)))
+              print('  %s: %s' % (z, api.zone_damper_position(z)))
    
 
     loop = asyncio.get_event_loop()
