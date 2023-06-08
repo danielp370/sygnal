@@ -21,18 +21,9 @@ to RAM(settings), RTC(clock) and EEPROM(name of zones, schedules).
 # Installation
 
 1. Put this in your homeassistant `config/custom_components/sygnal` directory.
-2. Add this to your configuration.yaml:
-    ```
-    climate:
-        - platform: sygnal
-        host: '198.168.1.xxx'  # Chatterbox IP address.
-        name: 'chatterbox'     # Whatever you want to call it.
-    ```
+2. Restart Home Assistant.
 
-You should see entities for `climate.chatterbox` and a switch for each zone.
-e.g. `climate.chatterbox_bedroom1`. Internal state(coil
-                                                   temperatures, compressor loading) are exported as device attributes.
-
+You should now be able to search for a "Sygnal Chatterbox" integration.
 
 # Limitations
 
