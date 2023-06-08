@@ -29,15 +29,15 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
 
 
 async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
-Any]:
+                                                                            Any]:
     """Validate the user input allows us to connect.
 
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the
 user.
     """
-    sygnal_client = SygnalClient(data[CONF_HOST], 
-        async_get_clientsession(hass),
-    )
+    sygnal_client = SygnalClient(data[CONF_HOST],
+                                 async_get_clientsession(hass),
+                                 )
 
     try:
         device_info = await sygnal_client.get_device_info()
@@ -83,6 +83,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
         )
+
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""

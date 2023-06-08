@@ -19,15 +19,11 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.SWITCH, Platform.COVER, Platform.CLIMATE]
-# TODO: Sensors for the various temperatures and states.
-#PLATFORMS += [Platform.SENSOR]
+PLATFORMS = [Platform.SWITCH, Platform.COVER, Platform.CLIMATE, Platform.SENSOR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up Sygnal from a config entry."""
     hass.data.setdefault(DOMAIN, {})
-
-    _LOGGER.error("Setup entry!")
 
     sygnal_connection = SygnalApi(SygnalClient(
         entry.data[CONF_HOST],
@@ -50,7 +46,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
-    _LOGGER.error("Unload entry!")
 
     return unload_ok
 

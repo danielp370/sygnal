@@ -72,8 +72,12 @@ class SygnalClient(object):
         if end < offset or end > 69:
           raise InvalidArgument('Length out of range: %s' % length)
         data = json.dumps({'method': "fetch", 'params': [{'table': "paray", 'start': offset, 'marker': "rot0", 'length': length, 'datatype': "bytes"}]})
-        ret = (await self._post(data))[0]
-        return ret['values']
+        try:
+          ret = (await self._post(data))[0]
+          return ret['values']
+        except Exception as e:
+          _LOGGER.error("Failed to read chatterbox device: %s", error)
+          raise error
 
     async def async_write_vram(self, offset : int, bitmask : int, value : int):
         """Set some bits of a byte at a specific offset in vram."""

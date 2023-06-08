@@ -11,7 +11,7 @@ from homeassistant.components.cover import (
     CoverEntityFeature,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_CLOSED, STATE_OPEN 
+from homeassistant.const import STATE_CLOSED, STATE_OPEN
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -23,13 +23,16 @@ _LOGGER = logging.getLogger(__name__)
 
 STATES_MAP = {0: STATE_CLOSED, 1: STATE_OPEN}
 
+
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up a cover for each zone damper."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    entities = [SygnalCover(coordinator, zone) for zone in coordinator.api.zones]
+    entities = [SygnalCover(coordinator, zone)
+                for zone in coordinator.api.zones]
     async_add_entities(entities)
+
 
 class SygnalCover(SygnalEntity, CoverEntity):
 
@@ -38,7 +41,7 @@ class SygnalCover(SygnalEntity, CoverEntity):
     _attr_device_class = CoverDeviceClass.DAMPER
     _attr_supported_features = (
         CoverEntityFeature.OPEN |
-        CoverEntityFeature.CLOSE | 
+        CoverEntityFeature.CLOSE |
         CoverEntityFeature.SET_POSITION
     )
 
@@ -67,8 +70,9 @@ class SygnalCover(SygnalEntity, CoverEntity):
     def _update_attr(self) -> None:
         status = self.coordinator.api
         self._attr_is_closed = not self.coordinator.api.zone_state(self._zone)
-        self._attr_current_cover_position = self.coordinator.api.zone_damper_position(self._zone)
+        self._attr_current_cover_position = self.coordinator.api.zone_damper_position(
+            self._zone)
 
-        #self._attr_name = "Owen Bed"#status["name"]
-        #state = STATES_MAP.get(status.get("zone"))  # type: ignore[arg-type]
-        #self._state = state
+        # self._attr_name = "Owen Bed"#status["name"]
+        # state = STATES_MAP.get(status.get("zone"))  # type: ignore[arg-type]
+        # self._state = state

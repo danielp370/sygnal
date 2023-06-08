@@ -6,7 +6,6 @@ from typing import Any, cast
 
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import STATE_CLOSED, STATE_OPEN 
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
@@ -15,8 +14,6 @@ from .const import DOMAIN
 from .entity import SygnalEntity
 
 _LOGGER = logging.getLogger(__name__)
-
-STATES_MAP = {0: STATE_CLOSED, 1: STATE_OPEN}
 
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback

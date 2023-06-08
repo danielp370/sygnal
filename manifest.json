@@ -1,13 +1,13 @@
 {
-  "domain": "sygnal",
-  "name": "Sygnal ChatterBox",
-  "config_flow": true,
-  "version": "1.1.0",
-  "documentation": "https://github.com/aarond10/sygnal",
-  "issue_tracker": "https://github.com/aarond10/sygnal/issues",
-  "dependencies": [],
-  "codeowners": ["@aarond10"],
-  "iot_class": "local_polling",
-  "loggers": ["sygnal"],
-  "requirements": []
+    "domain": "sygnal",
+    "name": "Sygnal ChatterBox",
+    "config_flow": true,
+    "version": "1.1.0",
+    "documentation": "https://github.com/aarond10/sygnal",
+    "issue_tracker": "https://github.com/aarond10/sygnal/issues",
+    "dependencies": [],
+    "codeowners": ["@aarond10"],
+    "iot_class": "local_polling",
+    "loggers": ["sygnal"],
+    "requirements": []
 }

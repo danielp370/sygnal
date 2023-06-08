@@ -22,13 +22,13 @@ from .const import DOMAIN
 from .entity import SygnalEntity
 
 HVAC_MODE_TO_SYGNAL = {
-    HVACMode.OFF       : 'off',
-    HVACMode.FAN_ONLY  : 'vent',
-    HVACMode.HEAT      : 'heat',
-    HVACMode.COOL      : 'cool',
-    HVACMode.HEAT_COOL : 'auto',
+    HVACMode.OFF: 'off',
+    HVACMode.FAN_ONLY: 'vent',
+    HVACMode.HEAT: 'heat',
+    HVACMode.COOL: 'cool',
+    HVACMode.HEAT_COOL: 'auto',
 }
-HVAC_MODE_FROM_SYGNAL = {v:k for k,v in HVAC_MODE_TO_SYGNAL.items()}
+HVAC_MODE_FROM_SYGNAL = {v: k for k, v in HVAC_MODE_TO_SYGNAL.items()}
 
 FAN_MODE_TO_SYGNAL = {
     FAN_AUTO:   'auto',
@@ -36,7 +36,7 @@ FAN_MODE_TO_SYGNAL = {
     FAN_MEDIUM: 'medium',
     FAN_HIGH:   'high',
 }
-FAN_MODE_FROM_SYGNAL = {v:k for k,v in FAN_MODE_TO_SYGNAL.items()}
+FAN_MODE_FROM_SYGNAL = {v: k for k, v in FAN_MODE_TO_SYGNAL.items()}
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -48,9 +48,10 @@ async def async_setup_entry(
 ) -> None:
     """Set up Sygnal climate platform."""
     async_add_entities(
-        [SygnalClimate(hass.data[DOMAIN][config_entry.entry_id], 
+        [SygnalClimate(hass.data[DOMAIN][config_entry.entry_id],
                        config_entry.unique_id)]
     )
+
 
 class SygnalClimate(SygnalEntity, ClimateEntity):
     """Sygnal/Livezi/ZPlus AC unit."""
@@ -62,9 +63,9 @@ class SygnalClimate(SygnalEntity, ClimateEntity):
     _attr_target_temperature_step = 0.5
     _attr_max_temp = 30
     _attr_min_temp = 15
-    _attr_hvac_modes =  list(HVAC_MODE_TO_SYGNAL.keys())
+    _attr_hvac_modes = list(HVAC_MODE_TO_SYGNAL.keys())
     _attr_supported_features = (
-        ClimateEntityFeature.FAN_MODE | 
+        ClimateEntityFeature.FAN_MODE |
         ClimateEntityFeature.TARGET_TEMPERATURE
     )
 
@@ -74,9 +75,9 @@ class SygnalClimate(SygnalEntity, ClimateEntity):
     @property
     def device_state_attributes(self):
         return {
-          'outside_coil_temperature': self.coordinator.api.outside_coil_temperature,
-          'inside_coil_temperature': self.coordinator.api.inside_coil_temperature,
-          'compressor_loading': self.coordinator.api.compressor_loading,
+            'outside_coil_temperature': self.coordinator.api.outside_coil_temperature,
+            'inside_coil_temperature': self.coordinator.api.inside_coil_temperature,
+            'compressor_loading': self.coordinator.api.compressor_loading,
         }
 
     @property
@@ -90,9 +91,9 @@ class SygnalClimate(SygnalEntity, ClimateEntity):
     @property
     def hvac_mode(self) -> HVACMode | None:
         if self.coordinator.api.hvac_mode in HVAC_MODE_FROM_SYGNAL:
-          return HVAC_MODE_FROM_SYGNAL[self.coordinator.api.hvac_mode]
+            return HVAC_MODE_FROM_SYGNAL[self.coordinator.api.hvac_mode]
         else:
-          return HVAC_MODE_HEAT_COOL
+            return HVAC_MODE_HEAT_COOL
 
     @property
     def hvac_modes(self):
@@ -105,10 +106,10 @@ class SygnalClimate(SygnalEntity, ClimateEntity):
     @property
     def fan_mode(self) -> str | None:
         if self.coordinator.api.fan_mode in FAN_MODE_FROM_SYGNAL:
-          return FAN_MODE_FROM_SYGNAL[self.coordinator.api.fan_mode]
+            return FAN_MODE_FROM_SYGNAL[self.coordinator.api.fan_mode]
         else:
-      
-          return FAN_LOW
+
+            return FAN_LOW
 
     @property
     def fan_modes(self):
@@ -135,5 +136,3 @@ class SygnalClimate(SygnalEntity, ClimateEntity):
 
     async def async_update(self):
         await self.coordinator.api.async_update()
-
-
