@@ -10,7 +10,7 @@ Note that I have a Livezi device. It seems that the Livezi brand was acquired by
 Sygnal some time around 2015 and I imagine the firmware on modern chatterbox units
 may be significantly different to mine.
 
-This code works for me. It might work for you. I'm not too keen on updating my
+This code works for me. It might work for you. I am not too keen on updating my
 firmware to support newer versions while it's working so well but will happily
 accept patches.
 
